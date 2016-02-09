@@ -1,0 +1,20 @@
+What is a databse?
+
+A database is a way to store data, where the data can be accessed and modified.
+
+Relational databases don't just store data. They make it possible, and offer tools,
+ to query, summarize, compare and connect data. In addition to this, they often
+  have built in rules to make sure that data is not disturbed, destroyed or treated
+in a way that corrupts it.
+
+To understand how relational databases work, it is important to understand that they
+are built on the data of which they consist. In other words, you must undertstand what
+your data has in common to be bale to build or understand the database structure.
+
+
+Data Types and meaning
+
+It is important to be aware of the different types of data. Like strings and integers.
+
+
+
