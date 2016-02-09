@@ -1,4 +1,4 @@
-What is a databse?
+What is a database?
 
 A database is a way to store data, where the data can be accessed and modified.
 
