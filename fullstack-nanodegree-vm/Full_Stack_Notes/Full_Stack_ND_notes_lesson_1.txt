@@ -17,4 +17,13 @@ Data Types and meaning
 It is important to be aware of the different types of data. Like strings and integers.
 
 
+Aggregations (in SQL)
+
+Aggregations take several rows and make aggregates of these rows. For example taking 
+all rows with the animal value Gorilla and summarizing them into a new table with a 
+row containing two cells called Gorilla and [a number, being the number of rows with
+the animal value Gorilla in the original table].
+
+Aggregations: Count, Avg, Max, Min, Sum
+
 
