@@ -1,0 +1,54 @@
+Reference notes for lesson 2: https://www.udacity.com/wiki/ud197/lesson-2
+
+
+Queries
+
+First, here is an example:
+
+QUERY = '''
+select name, birthdate from animals where species = 'gorilla';
+'''
+
+The above querirs for name and birthdate in the table animals, but only for the
+ animals that have the species gorilla.
+
+
+Some datatypes in SQL:
+
+text - a string of any length, like Python's str type.
+Values are written in 'single quotes'.
+
+integer - like Python's int type, but with different limits.
+
+date - a calendar date.
+values are written like this: '2016-02-10'.
+The single quotes are important, as the interpreter will think that the above(without
+single quotes) means 2016 - 2 - 10, which gives an output of 2004.
+
+
+Querying for something which excludes certain types can be done by writing:
+select name from animals where (not species = 'gorilla').
+This can also be done  with python-like annotation:
+select name from animals where species != 'gorilla'
+
+
+The one thing SQL is kind of terrible at
+
+For some reason, it is difficult or impossible to check out the names of tables or of
+ columns in tables through your code. You have to do it through your console. And different
+ terms are used for different types of SQL.
+
+
+Link to page in lesson where SQL syntax can be tested:
+ https://www.udacity.com/course/viewer#!/c-ud197-nd/l-3423258756/e-3388528706/m-3103708712
+
+
+Insert Statements are easier than Query statements.
+Basically: insert into table(names of columns separated by commas) values(names or values of data inside single quotes, separated by commas);
+
+
+Joins
+
+Example: select T.thing, S.stuff from T, S where T.target = S.match
+
+
