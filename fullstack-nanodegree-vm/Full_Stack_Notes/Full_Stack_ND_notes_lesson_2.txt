@@ -51,4 +51,28 @@ Joins
 
 Example: select T.thing, S.stuff from T, S where T.target = S.match
 
+Here is an example from the quiz:
+QUERY = '''
+select animals.name from animals join diet on animals.species = diet.species where food = 'fish';
+'''
+
+Alternatively:
+
+select name from animals, diet where animal.species = diet.species and diet.food = 'fish';
+
+
+And here is the answer for the triple join example:
+
+select ordernames.name, count(*) as num
+  from animals, taxonomy, ordernames
+  where animals.species = taxonomy.name
+    and taxonomy.t_order = ordernames.t_order
+  group by ordernames.name
+  order by num desc
+
+
+Note to self: Remember the 'group by' as this was your donwfall in solving this first time.
+
+
+
 
