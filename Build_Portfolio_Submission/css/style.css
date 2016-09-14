@@ -1,0 +1,110 @@
+body {
+    font-family: 'Raleway', sans-serif;
+}
+
+h1 {
+    font-weight: 400;
+    font-size: 3em;
+}
+
+h3 {
+    font-weight: 200;
+}
+
+.hr_light {
+    height: 1px;
+    background-color: #f2f2f2;
+}
+
+hr {
+    height: 5px;
+    background-color: #7d97ad;
+}
+
+img {
+    max-width: 100%;
+}
+
+a {
+    color: inherit;
+}
+
+a:link, a:visited, a:hover, a:active {
+    .kuroko {
+        text-decoration: none;
+    }
+}
+
+.app_title {
+    text-align: center;
+}
+
+.app_link {
+    text-align: center;
+    font-size: .7em;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto 0 auto;
+}
+
+.modalpic {
+    cursor: pointer;
+}
+
+.logo {
+    max-width: 120px;
+    max-height: 120px;
+    padding: 10px;
+}
+
+[class*="zocial-"]:before {
+  display: inline-block;
+  font-family: 'zocial', sans-serif;
+  font-size: 2em;
+  text-shadow: 3px 3px 3px #aaa;
+  width: 2em;
+}
+
+.googleplus {
+    color: #d34836;
+}
+
+.facebook {
+    color: #3b5998;
+}
+
+.twitter {
+    color: #4099ff;
+}
+
+.git {
+    color: black;
+}
+
+.contact {
+    text-align: right;
+}
+
+@media screen and (min-width: 992px) {
+    .hr_light {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 717px) {
+    h1 {
+        font-size: 2em;
+    }
+    h3 {
+        font-size: 1em;
+    }
+}
+
+@media screen and (max-width: 498px) {
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
