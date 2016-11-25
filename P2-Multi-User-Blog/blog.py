@@ -169,7 +169,7 @@ class NewPost(Handler):
 
     def post(self):
         if not self.user:
-            self.redirect('/blog')
+            self.redirect("/blog")
 
         subject = self.request.get("subject")
         content = self.request.get("content")
@@ -182,6 +182,36 @@ class NewPost(Handler):
         else:
             error = "You have to fill in both subject and content fields!"
             self.render("newpost.html", subject=subject, content=content, error=error)
+
+
+# class that opens an existing post for editing
+
+class EditPost(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        if post.user_id == self.user.key().id():
+            self.render("edit.html", subject=p.subject, content=p.content)
+        else:
+            error = "You need to be logged in to edit your post!"
+            self.render('login.html', error=error)
+
+    def post(self):
+        if not self.user:
+            self.redirect("/blog")
+
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+        author = self.user.name
+
+        if subject and content:
+            p = Posts(parent = blog_key(), author=author, subject=subject, content=content)
+            p.put()
+            self.redirect("/blog/%s" % str(p.key().id()))
+        else:
+            error = "You have to fill in both subject and content fields!"
+            self.render("edit.html", subject=subject, content=content, error=error)
 
 
 # functions that check username, password and email for correct syntax in the signup form
@@ -306,6 +336,7 @@ class MainPage(Handler):
 app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog', MainPage),
                                ('/blog/newpost', NewPost),
+                               ('/blog/edit/([0-9]+)', EditPost),
                                ('/blog/([0-9]+)', PostHandler),
                                ('/blog/signup', Register),
                                ('/blog/welcome', WelcomeHandler),
