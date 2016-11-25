@@ -3,5 +3,15 @@
 {% block content %}
     {% for p in posts %}
         {{ p.render() | safe }}
+        <div class="post_footer">
+        {% if p.author == user.name %}
+            <form action="/blog/edit/{{postid}}">
+                <input type="submit" value="EDIT">
+            </form>
+            <button type="button">DELETE</button>
+        {% endif %}
+        {{ p.author }}
+        </div>
+        <br><br><br>
     {% endfor %}
 {% endblock %}

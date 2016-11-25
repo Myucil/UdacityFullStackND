@@ -2,4 +2,11 @@
 
 {% block content %}
     {{ p.render() | safe }}
+    <div class="post_footer">
+        {% if p.author == user.name %}
+            <button type="button">EDIT</button>
+            <button type="button">DELETE</button>
+        {% endif %}
+        {{ p.author }}
+    </div>
 {% endblock %}
