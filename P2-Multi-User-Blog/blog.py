@@ -191,15 +191,13 @@ class EditPost(Handler):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
 
-        if post.user_id == self.user.key().id():
-            self.render("edit.html", subject=p.subject, content=p.content)
+        if self.user.name == p.author:
+            self.render("edit.html", p=p, subject=p.subject, content=p.content)
         else:
             error = "You need to be logged in to edit your post!"
             self.render('login.html', error=error)
 
     def post(self):
-        if not self.user:
-            self.redirect("/blog")
 
         subject = self.request.get("subject")
         content = self.request.get("content")
@@ -211,7 +209,7 @@ class EditPost(Handler):
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "You have to fill in both subject and content fields!"
-            self.render("edit.html", subject=subject, content=content, error=error)
+            self.render("edit.html", p=p, subject=subject, content=content, error=error)
 
 
 # functions that check username, password and email for correct syntax in the signup form
