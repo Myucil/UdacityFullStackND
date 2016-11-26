@@ -4,8 +4,12 @@
     {{ p.render() | safe }}
     <div class="post_footer">
         {% if p.author == user.name %}
-            <button type="button">EDIT</button>
-            <button type="button">DELETE</button>
+            <form action="/blog/edit/{{p.key().id()}}" >
+                <input type="submit" value="EDIT">
+            </form>
+            <form action="">
+                <input type="submit" value="DELETE">
+            </form>
         {% endif %}
         {{ p.author }}
     </div>

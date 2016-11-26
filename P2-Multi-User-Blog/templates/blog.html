@@ -4,13 +4,15 @@
     {% for p in posts %}
         {{ p.render() | safe }}
         <div class="post_footer">
+        {{ p.author }}
         {% if p.author == user.name %}
-            <form action="/blog/edit/{{postid}}">
+            <form action="/blog/edit/{{p.key().id()}}" >
                 <input type="submit" value="EDIT">
             </form>
-            <button type="button">DELETE</button>
+            <form action="">
+                <input type="submit" value="DELETE">
+            </form>
         {% endif %}
-        {{ p.author }}
         </div>
         <br><br><br>
     {% endfor %}
