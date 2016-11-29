@@ -1,17 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {{ message }}
     {% for p in posts %}
         {{ p.render() | safe }}
         <div class="post_footer">
         {{ p.author }}
         {% if p.author == user.name %}
             <form action="/blog/edit/{{p.key().id()}}" >
-                <input type="submit" value="EDIT">
+                <input type="submit" value="EDIT POST">
             </form>
-            <form action="">
-                <input type="submit" value="DELETE">
+            <form action="/blog/deleted/{{p.key().id()}}" method="get">
+                <input type="submit" value="DELETE POST">
             </form>
+        {% endif %}
+        {% if p.author != user.name %}
+            <form action="/blog/newcomment/{{p.key().id()}}" method="get">
+                <input type="submit" value="LEAVE A COMMENT">
+            </form>
+            <div class="post_comment">
+                {% for c in comments %}
+                    {% if c.commentid == p.post_id %}
+                        <div class="comment">
+                            {{ c.comment }}
+                            <br>
+                            written by
+                            <br>
+                            {{ c.commentauthor }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         {% endif %}
         </div>
         <br><br><br>

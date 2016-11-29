@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {{ p.render() | safe }}
+    <div class="post_footer">
+        {{ p.author }}
+    </div>
+    <h2>Please comment below:</h2>
+    <form method="post">
+        <label>
+            <div>subject</div>
+            <input type="text" name="comment" value="{{comment}}">
+        </label>
+        <div class="error">{{error}}</div>
+        <input type="submit" value="submit comment">
+    </form>
+{% endblock %}
