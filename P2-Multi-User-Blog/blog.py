@@ -35,9 +35,9 @@ def check_secure_val(secure_val):
         return val
 
 
-# class that handles rendering and writing and can be used in other classes that inherit from it
-
 class Handler(webapp2.RequestHandler):
+    """class that handles rendering and writing and can be used
+       in other classes that inherit from it"""
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -70,9 +70,8 @@ class Handler(webapp2.RequestHandler):
         self.user = uid and User.by_id(int(uid))
 
 
-# class that renders a start page, just for the sake of it
-
 class Entrance(Handler):
+    """class that renders a start page, just for the sake of it"""
     def get(self):
         self.render("entrance.html")
 
@@ -96,9 +95,8 @@ def users_key(group = 'default'):
     return db.Key.from_path('users', group)
 
 
-# class that creates the basic database specifics for a user
-
 class User(db.Model):
+    """class that creates the basic database specifics for a user"""
     name = db.StringProperty(required = True)
     pw_hash = db.StringProperty(required = True)
     email = db.StringProperty()
@@ -127,12 +125,11 @@ class User(db.Model):
             return u
 
 
-# class that creates the basic database specifics for a blog post
-
 def blog_key(name = 'default'):
     return db.Key.from_path('blogs', name)
 
 class Posts(db.Model):
+    """class that creates the basic database specifics for a blog post"""
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     author = db.StringProperty(required=True)
@@ -143,9 +140,8 @@ class Posts(db.Model):
         return render_str("post.html", p = self)
 
 
-# class that shows a newly created blog post
-
 class PostHandler(Handler):
+    """class that shows a newly created blog post"""
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
@@ -157,9 +153,8 @@ class PostHandler(Handler):
         self.render("permalink.html", p = p)
 
 
-# class that renders a form page for creating a new blog post
-
 class NewPost(Handler):
+    """class that renders a form page for creating a new blog post"""
     def get(self):
         if self.user:
             self.render("newpost.html")
@@ -184,20 +179,20 @@ class NewPost(Handler):
             self.render("newpost.html", subject=subject, content=content, error=error)
 
 
-# class that opens an existing post for editing
-
 class EditPost(Handler):
+    """class that opens an existing post for editing"""
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
 
         if self.user.name == p.author:
             self.render("edit.html", p=p, subject=p.subject, content=p.content)
+            p.delete()
         else:
             error = "You need to be logged in to edit your post!"
             self.render('login.html', error=error)
 
-    def post(self):
+    def post(self, post_id):
 
         subject = self.request.get("subject")
         content = self.request.get("content")
@@ -210,6 +205,61 @@ class EditPost(Handler):
         else:
             error = "You have to fill in both subject and content fields!"
             self.render("edit.html", p=p, subject=subject, content=content, error=error)
+
+
+
+class DeletePost(Handler):
+    """class for deleting a blog post"""
+    def get(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        if self.user.name == p.author:
+            p.delete()
+            self.render("blog.html", p=p)
+        else:
+            error = "You can only delete your own posts!"
+            self.render("login.html", error=error)
+
+
+class Comment(db.Model):
+    """class that creates the basic database specifics for a comment"""
+    comment = db.TextProperty(required=True)
+    commentauthor = db.StringProperty(required=True)
+    commentid = db.IntegerProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+
+
+class CreateComment(Handler):
+    """class that handles a new comment"""
+    def get(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        if self.user:
+            if self.user.name != p.author:
+                self.render("newcomment.html", p=p, subject=p.subject, content=p.content)
+            else:
+                error = "You can not comment your own posts!"
+                self.redirect('/blog', message=error)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        comment = self.request.get("comment")
+        commentauthor = self.user.name
+        commentid = str(p.key().id())
+
+        if comment and commentid:
+            c = Comment(parent = blog_key(), comment=comment, commentauthor=commentauthor, commentid = commentid)
+            c.put()
+            self.redirect("/blog")
+        else:
+            error = "You have to enter text in the comment field!"
+            self.render("newcomment.html", p=p, subject=p.subject, content=p.content, error=error)
+
+
 
 
 # functions that check username, password and email for correct syntax in the signup form
@@ -227,9 +277,9 @@ def valid_email(email):
     return not email or email_RE.match(email)
 
 
-# class that renders the signup form and uses the functions above to check signup syntax
-
 class SignUpHandler(Handler):
+    """class that renders the signup form and uses
+       the functions above to check signup syntax"""
     def get(self):
         self.render('signup.html')
 
@@ -266,9 +316,8 @@ class SignUpHandler(Handler):
         raise NotImplementedError
 
 
-# class for registering a user, if the user is new and unique
-
 class Register(SignUpHandler):
+    """class for registering a user, if the user is new and unique"""
     def done(self):
         u = User.by_name(self.username)
         if u:
@@ -282,9 +331,8 @@ class Register(SignUpHandler):
             self.redirect('/blog/welcome')
 
 
-# login class
-
 class Login(Handler):
+    """login class"""
     def get(self):
         self.render('login.html')
 
@@ -301,17 +349,15 @@ class Login(Handler):
             self.render('login.html', error = message)
 
 
-# logout class
-
 class Logout(Handler):
+    """logout class"""
     def get(self):
         self.logout()
         self.redirect('/blog/signup')
 
 
-# class that renders a welcome page when a new user has signed up
-
 class WelcomeHandler(Handler):
+    """class that renders a welcome page when a new user has signed up"""
     def get(self):
         if self.user:
             self.render('welcome.html', username = self.user.name)
@@ -319,12 +365,12 @@ class WelcomeHandler(Handler):
             self.redirect('/blog/signup')
 
 
-# class that renders the main blog page
-
 class MainPage(Handler):
+    """class that renders the main blog page"""
     def render_blog(self):
         posts = db.GqlQuery("SELECT * FROM Posts ORDER BY created DESC LIMIT 10")
-        self.render("blog.html", posts=posts)
+        comments = db.GqlQuery("SELECT * FROM Comment ORDER BY created DESC LIMIT 10")
+        self.render("blog.html", posts=posts, comments = comments)
 
     def get(self):
         self.render_blog()
@@ -339,7 +385,9 @@ app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog/signup', Register),
                                ('/blog/welcome', WelcomeHandler),
                                ('/blog/login', Login),
-                               ('/blog/logout', Logout)
+                               ('/blog/logout', Logout),
+                               ('/blog/deleted/([0-9]+)', DeletePost),
+                               ('/blog/newcomment/([0-9]+)', CreateComment)
                              ],
                              debug=True)
 
