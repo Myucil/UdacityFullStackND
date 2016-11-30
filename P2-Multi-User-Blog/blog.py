@@ -5,6 +5,7 @@ import re
 import hmac
 import hashlib
 import random
+import time
 
 from string import letters
 
@@ -133,6 +134,8 @@ class Posts(db.Model):
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     author = db.StringProperty(required=True)
+    likes = db.IntegerProperty()
+    likers = db.StringListProperty()
     created = db.DateTimeProperty(auto_now_add=True)
 
     def render(self):
@@ -169,14 +172,31 @@ class NewPost(Handler):
         subject = self.request.get("subject")
         content = self.request.get("content")
         author = self.user.name
+        likes = 0
 
         if subject and content:
-            p = Posts(parent = blog_key(), author=author, subject=subject, content=content)
+            p = Posts(parent = blog_key(), author=author, subject=subject, content=content, likes=likes)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "You have to fill in both subject and content fields!"
             self.render("newpost.html", subject=subject, content=content, error=error)
+
+
+class LikeHandler(Handler):
+    """class that handles likes for a bogpost, updating the posts number of
+     likes and the people who have liked it"""
+    def post(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        p.likes = p.likes + 1
+        p.likers.append(self.user.name)
+
+        if self.user.name != p.author:
+            p.put()
+            time.sleep(0.1)
+            self.redirect("/blog")
 
 
 class EditPost(Handler):
@@ -187,19 +207,22 @@ class EditPost(Handler):
 
         if self.user.name == p.author:
             self.render("edit.html", p=p, subject=p.subject, content=p.content)
-            p.delete()
         else:
             error = "You need to be logged in to edit your post!"
             self.render('login.html', error=error)
 
     def post(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
 
         subject = self.request.get("subject")
         content = self.request.get("content")
-        author = self.user.name
+        # author = self.user.name
 
         if subject and content:
-            p = Posts(parent = blog_key(), author=author, subject=subject, content=content)
+            p.subject = subject
+            p.content = content
+            # p = Posts(parent = blog_key(), author=author, subject=subject, content=content)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
@@ -247,19 +270,19 @@ class CreateComment(Handler):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
 
-        comment = self.request.get("comment")
+        commentin = self.request.get("comment")
+        comment = commentin.replace('\n', '<br>')
         commentauthor = self.user.name
-        commentid = str(p.key().id())
+        commentid = int(p.key().id())
 
         if comment and commentid:
             c = Comment(parent = blog_key(), comment=comment, commentauthor=commentauthor, commentid = commentid)
             c.put()
+            time.sleep(0.1)
             self.redirect("/blog")
         else:
             error = "You have to enter text in the comment field!"
             self.render("newcomment.html", p=p, subject=p.subject, content=p.content, error=error)
-
-
 
 
 # functions that check username, password and email for correct syntax in the signup form
@@ -387,7 +410,8 @@ app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog/login', Login),
                                ('/blog/logout', Logout),
                                ('/blog/deleted/([0-9]+)', DeletePost),
-                               ('/blog/newcomment/([0-9]+)', CreateComment)
+                               ('/blog/newcomment/([0-9]+)', CreateComment),
+                               ('/blog/newlike/([0-9]+)', LikeHandler)
                              ],
                              debug=True)
 
