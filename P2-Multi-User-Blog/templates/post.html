@@ -3,5 +3,6 @@
         <div class="post_title">{{ p.subject }}</div>
         <div class="post_date">{{ p.created.strftime("%a %b %d, %Y") }}</div>
     </div>
+    <br>
     <div class="post_content">{{ p.render_text | safe }}</div>
 </div>

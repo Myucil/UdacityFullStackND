@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {{ message }}
     {% for p in posts %}
         {{ p.render() | safe }}
         <div class="post_footer">
         {{ p.author }}
         <br><br>
-        {% if p.author == user.name %}
-            <form action="/blog/edit/{{p.key().id()}}" class="edit_button">
-                <input type="submit" value="EDIT POST">
-            </form>
-            <form action="/blog/deleted/{{p.key().id()}}" method="get" class="delete_button">
-                <input type="submit" value="DELETE POST">
-            </form>
-            <br><br>
+        {% if user.name %}
+            {% if p.author == user.name %}
+                <form action="/blog/edit/{{p.key().id()}}" class="edit_button">
+                    <input type="submit" value="EDIT POST">
+                </form>
+                <form action="/blog/deleted/{{p.key().id()}}" method="get" class="delete_button">
+                    <input type="submit" value="DELETE POST">
+                </form>
+                <br><br>
+            {% endif %}
         {% endif %}
         {% if p.likes == 1 %}
             {{ p.likes }} person likes this post
@@ -22,14 +23,16 @@
             {{ p.likes }} people like this post
         {% endif %}
         <br><br>
-        {% if p.author != user.name %}
-            <form action="/blog/newcomment/{{p.key().id()}}" method="get">
-                <input type="submit" value="LEAVE A COMMENT">
-            </form>
-            {% if user.name not in p.likers %}
-                <form action="/blog/newlike/{{p.key().id()}}" method="post">
-                    <input type="submit" value="LIKE">
+        {% if user.name %}
+            {% if p.author != user.name %}
+                <form action="/blog/newcomment/{{p.key().id()}}" method="get">
+                    <input type="submit" value="LEAVE A COMMENT">
                 </form>
+                {% if user.name not in p.likers %}
+                    <form action="/blog/newlike/{{p.key().id()}}" method="post">
+                        <input type="submit" value="LIKE">
+                    </form>
+                {% endif %}
             {% endif %}
             <br>
             <div class="post_comment">
@@ -40,11 +43,17 @@
                             <span class="comment_content">
                                 {{ c.comment | safe }}
                             </span>
-                            <br>
+                            <br><br>
                             <span class="comment_sign">
                                 written by {{ c.commentauthor }} on {{ c.created.strftime("%a %b %d, %Y") }}
                             </span>
                             <br><br>
+                            {% if c.commentauthor == user.name %}
+                                <form action="/blog/newcomment/{{p.key().id()}}" method="get">
+                                    <input type="submit" value="EDIT COMMENT">
+                                </form>
+                            <br><br>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endfor %}

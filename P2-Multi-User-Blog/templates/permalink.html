@@ -3,14 +3,16 @@
 {% block content %}
     {{ p.render() | safe }}
     <div class="post_footer">
-        {% if p.author == user.name %}
-            <form action="/blog/edit/{{p.key().id()}}" >
-                <input type="submit" value="EDIT">
-            </form>
-            <form action="">
-                <input type="submit" value="DELETE">
-            </form>
-        {% endif %}
         {{ p.author }}
+        <br><br>
+        {% if p.author == user.name %}
+            <form action="/blog/edit/{{p.key().id()}}" class="edit_button">
+                <input type="submit" value="EDIT POST">
+            </form>
+            <form action="/blog/deleted/{{p.key().id()}}" method="get" class="delete_button">
+                <input type="submit" value="DELETE POST">
+            </form>
+            <br><br>
+        {% endif %}
     </div>
 {% endblock %}
