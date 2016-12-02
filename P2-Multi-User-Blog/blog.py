@@ -184,7 +184,7 @@ class NewPost(Handler):
 
 
 class LikeHandler(Handler):
-    """class that handles likes for a bogpost, updating the posts number of
+    """class that handles likes for a blogpost, updating the posts number of
      likes and the people who have liked it"""
     def post(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
@@ -217,12 +217,10 @@ class EditPost(Handler):
 
         subject = self.request.get("subject")
         content = self.request.get("content")
-        # author = self.user.name
 
         if subject and content:
             p.subject = subject
             p.content = content
-            # p = Posts(parent = blog_key(), author=author, subject=subject, content=content)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
@@ -258,10 +256,12 @@ class CreateComment(Handler):
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
+        q = int(p.key().id())
+        c = db.GqlQuery("SELECT comment FROM Comment WHERE commentid = :q", q=q)
 
         if self.user:
             if self.user.name != p.author:
-                self.render("newcomment.html", p=p, subject=p.subject, content=p.content)
+                self.render("newcomment.html", p=p, subject=p.subject, content=p.content, commentxist=c)
             else:
                 error = "You can not comment your own posts!"
                 self.redirect('/blog', message=error)
@@ -283,6 +283,19 @@ class CreateComment(Handler):
         else:
             error = "You have to enter text in the comment field!"
             self.render("newcomment.html", p=p, subject=p.subject, content=p.content, error=error)
+
+
+class MyPosts(Handler):
+    """class that handles users own posts, to show them all on one page"""
+    def render_posts(self):
+        u = self.user.name
+        my_posts = db.GqlQuery("SELECT * FROM Posts WHERE author = :u ORDER BY created DESC", u=u)
+        comments = db.GqlQuery("SELECT * FROM Comment")
+        self.render("myposts.html", my_posts=my_posts, comments=comments)
+
+    def get(self):
+        self.render_posts()
+
 
 
 # functions that check username, password and email for correct syntax in the signup form
@@ -411,7 +424,8 @@ app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog/logout', Logout),
                                ('/blog/deleted/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),
-                               ('/blog/newlike/([0-9]+)', LikeHandler)
+                               ('/blog/newlike/([0-9]+)', LikeHandler),
+                               ('/blog/myposts', MyPosts)
                              ],
                              debug=True)
 
