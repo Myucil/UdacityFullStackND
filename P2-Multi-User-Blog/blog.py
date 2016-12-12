@@ -16,7 +16,8 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
     autoescape = True)
 
 
-# Global function for rendering a string which does not inherit from the class Handler
+# Global function for rendering a string which does not inherit from the class
+# Handler
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
@@ -175,12 +176,14 @@ class NewPost(Handler):
         likes = 0
 
         if subject and content:
-            p = Posts(parent = blog_key(), author=author, subject=subject, content=content, likes=likes)
+            p = Posts(parent = blog_key(), author=author, subject=subject,
+                      content=content, likes=likes)
             p.put()
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "You have to fill in both subject and content fields!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
+            self.render("newpost.html", subject=subject, content=content,
+                         error=error)
 
 
 class LikeHandler(Handler):
@@ -225,7 +228,8 @@ class EditPost(Handler):
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "You have to fill in both subject and content fields!"
-            self.render("edit.html", p=p, subject=subject, content=content, error=error)
+            self.render("edit.html", p=p, subject=subject, content=content,
+                         error=error)
 
 
 
@@ -259,7 +263,8 @@ class CreateComment(Handler):
 
         if self.user:
             if self.user.name != p.author:
-                self.render("newcomment.html", p=p, subject=p.subject, content=p.content)
+                self.render("newcomment.html", p=p, subject=p.subject,
+                             content=p.content)
             else:
                 error = "You can not comment your own posts!"
                 self.redirect('/blog', message=error)
@@ -274,20 +279,23 @@ class CreateComment(Handler):
         commentid = int(p.key().id())
 
         if comment and commentid:
-            c = Comment(parent = blog_key(), comment=comment, commentauthor=commentauthor, commentid = commentid)
+            c = Comment(parent = blog_key(), comment=comment,
+                        commentauthor=commentauthor, commentid = commentid)
             c.put()
             time.sleep(0.1)
             self.redirect("/blog")
         else:
             error = "You have to enter text in the comment field!"
-            self.render("newcomment.html", p=p, subject=p.subject, content=p.content, error=error)
+            self.render("newcomment.html", p=p, subject=p.subject,
+                         content=p.content, error=error)
 
 
 class MyPosts(Handler):
     """class that handles users own posts, to show them all on one page"""
     def render_posts(self):
         u = self.user.name
-        my_posts = db.GqlQuery("SELECT * FROM Posts WHERE author = :u ORDER BY created DESC", u=u)
+        my_posts = db.GqlQuery("""SELECT * FROM Posts WHERE author = :u
+                                ORDER BY created DESC""", u=u)
         comments = db.GqlQuery("SELECT * FROM Comment")
         self.render("myposts.html", my_posts=my_posts, comments=comments)
 
@@ -296,7 +304,8 @@ class MyPosts(Handler):
 
 
 
-# functions that check username, password and email for correct syntax in the signup form
+# functions that check username, password and email for correct syntax in
+# the signup form
 
 username_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
