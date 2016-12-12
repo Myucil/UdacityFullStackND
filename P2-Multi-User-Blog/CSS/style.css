@@ -1,20 +1,90 @@
 body {
-    width: 800px;
+    max-width: 800px;
+    width: 100%;
     margin: 0 auto 0 auto;
+    font-family: courier;
+    background-color: black;
+    color: white;
+}
+
+.img_container {
+    width: 100%;
+    vertical-align: middle;
+}
+
+.img {
+    max-width: 80%;
+    margin: auto;
+    padding: auto;
+}
+
+.container {
+    width: 100%;
+    float: left;
+}
+
+.row {
+    width: 100%;
+    float: left;
+}
+
+.dropdown_menu_div {
+    display: inline-block;
+    position: relative;
+    margin: 20px 0 20px 0;
+    height: 40px;
+    width: 22.5%;
+    font-size: 14px;
+    text-align: center;
+}
+
+.dropdown_content {
+    display: none;
+    position: absolute;
+    background-color: #333333;
+    width: 60%;
+    padding: 12px 16px;
+}
+
+.dropdown_menu_div:hover .dropdown_content {
+    display: inline;
+}
+
+.blog_title {
+    display: inline-block;
+    margin: 20px 0 20px 0;
+    height: 40px;
+    width: 50%;
+    font-size: 30px;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.user_menu_div {
+    display: inline-block;
+    margin: 20px 0 20px 0;
+    height: 40px;
+    width: 22.5%;
+    font-size: 14px;
+    text-align: center;
 }
 
 a:link {
     text-decoration: none;
-    color: black;
+    color: white;
 }
 
 a:visited {
     text-decoration: none;
-    color: black;
+    color: white;
 }
 
 .error {
     color: red;
+}
+
+.entrance {
+    text-align: center;
 }
 
 
@@ -39,37 +109,28 @@ input[type=submit] {
 }
 
 .post_heading {
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid white;
 }
 
 .post_footer {
     font-size: 0.8em;
     color: gray;
     text-align: right;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid white;
 }
 
 .post_title {
-    display: inline-block;
+    display: inline;
     width: 49%;
-    font-family: arial;
     font-weight: bold;
+    text-align: left;
 }
 
 .post_date {
-    display: inline-block;
+    display: inline;
+    float: right;
     width: 50%;
     text-align: right;
-}
-
-.blog_title {
-    display: inline-block;
-    margin: 30px 0 20px 0;
-    width: 80%;
-    font-size: 30px;
-    font-family: arial;
-    font-weight: bolder;
-    text-align: center;
 }
 
 .author {
@@ -77,11 +138,36 @@ input[type=submit] {
     text-align: right;
 }
 
-.login_signup {
-    display: inline-block;
-    margin-top: 30px;
+.comment {
+    width: 80%;
+    margin: 0 auto;
+    border-top: 1px dotted gray;
+}
+
+.comment_content {
+    margin:10px;
+    text-align: left;
+    font-family: times;
+    color: white;
+}
+
+.comment_sign {
+
+}
+
+.edit_button {
+    display: inline;
+    color: black;
+}
+
+.delete_button {
+    display: inline;
     float: right;
-    width: 19%;
-    text-align: right;
+    color: red;
+}
+
+.yourpoetry {
+    text-align: center;
+    background-color: #333333;
 }
 
