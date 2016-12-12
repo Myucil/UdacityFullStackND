@@ -256,12 +256,10 @@ class CreateComment(Handler):
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
-        q = int(p.key().id())
-        c = db.GqlQuery("SELECT comment FROM Comment WHERE commentid = :q", q=q)
 
         if self.user:
             if self.user.name != p.author:
-                self.render("newcomment.html", p=p, subject=p.subject, content=p.content, commentxist=c)
+                self.render("newcomment.html", p=p, subject=p.subject, content=p.content)
             else:
                 error = "You can not comment your own posts!"
                 self.redirect('/blog', message=error)
@@ -404,8 +402,8 @@ class WelcomeHandler(Handler):
 class MainPage(Handler):
     """class that renders the main blog page"""
     def render_blog(self):
-        posts = db.GqlQuery("SELECT * FROM Posts ORDER BY created DESC LIMIT 10")
-        comments = db.GqlQuery("SELECT * FROM Comment ORDER BY created DESC LIMIT 10")
+        posts = db.GqlQuery("SELECT * FROM Posts ORDER BY created DESC LIMIT 20")
+        comments = db.GqlQuery("SELECT * FROM Comment ORDER BY created DESC")
         self.render("blog.html", posts=posts, comments = comments)
 
     def get(self):
