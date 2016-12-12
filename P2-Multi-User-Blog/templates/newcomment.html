@@ -6,9 +6,11 @@
         {{ p.author }}
     </div>
     <h2>Please comment below:</h2>
+    To abort commenting, please go to main page through the menu.
+    <br><br>
     <form method="post">
         <label>
-            <textarea name="comment" class="cont" value="{{comment}}">{{ commentxist }}</textarea>
+            <textarea name="comment" class="cont" value="{{comment}}"></textarea>
         </label>
         <div class="error">{{error}}</div>
         <input type="submit" value="submit comment">
