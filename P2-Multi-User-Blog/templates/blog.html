@@ -24,10 +24,10 @@
         {% endif %}
         <br><br>
         {% if user.name %}
+            <form action="/blog/newcomment/{{p.key().id()}}" method="get">
+                <input type="submit" value="LEAVE A COMMENT">
+            </form>
             {% if p.author != user.name %}
-                <form action="/blog/newcomment/{{p.key().id()}}" method="get">
-                    <input type="submit" value="LEAVE A COMMENT">
-                </form>
                 {% if user.name not in p.likers %}
                     <form action="/blog/newlike/{{p.key().id()}}" method="post">
                         <input type="submit" value="LIKE">
@@ -48,6 +48,10 @@
                                 written by {{ c.commentauthor }} on {{ c.created.strftime("%a %b %d, %Y") }}
                             </span>
                             <br><br>
+                            <form action="/blog/editcomment/{{p.key().id()}}" method="get">
+                                <input type="submit" value="EDIT COMMENT">
+                            </form>
+                            <br>
                         </div>
                     {% endif %}
                 {% endfor %}
