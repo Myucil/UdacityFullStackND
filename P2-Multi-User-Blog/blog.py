@@ -168,7 +168,7 @@ class NewPost(Handler):
 
     def post(self):
         if not self.user:
-            self.redirect("/blog")
+            return self.redirect("/blog/login")
 
         subject = self.request.get("subject")
         content = self.request.get("content")
@@ -212,7 +212,7 @@ class EditPost(Handler):
             self.render("edit.html", p=p, subject=p.subject, content=p.content)
         else:
             error = "You need to be logged in to edit your post!"
-            self.render('login.html', error=error)
+            return self.render('login.html', error=error)
 
     def post(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
@@ -221,15 +221,19 @@ class EditPost(Handler):
         subject = self.request.get("subject")
         content = self.request.get("content")
 
-        if subject and content:
-            p.subject = subject
-            p.content = content
-            p.put()
-            self.redirect("/blog/%s" % str(p.key().id()))
+        if self.user.name == p.author:
+            if subject and content:
+                p.subject = subject
+                p.content = content
+                p.put()
+                self.redirect("/blog/%s" % str(p.key().id()))
+            else:
+                error = "You have to fill in both subject and content fields!"
+                self.render("edit.html", p=p, subject=subject, content=content,
+                             error=error)
         else:
-            error = "You have to fill in both subject and content fields!"
-            self.render("edit.html", p=p, subject=subject, content=content,
-                         error=error)
+            error = "You need to be logged in to edit your post!"
+            return self.render('login.html', error=error)
 
 
 
@@ -244,7 +248,7 @@ class DeletePost(Handler):
             self.render("blog.html", p=p)
         else:
             error = "You can only delete your own posts!"
-            self.render("login.html", error=error)
+            return self.render("login.html", error=error)
 
 
 class Comment(db.Model):
@@ -262,12 +266,11 @@ class CreateComment(Handler):
         p = db.get(key)
 
         if self.user:
-            if self.user.name != p.author:
-                self.render("newcomment.html", p=p, subject=p.subject,
-                             content=p.content)
-            else:
-                error = "You can not comment your own posts!"
-                self.redirect('/blog', message=error)
+            self.render("newcomment.html", p=p, subject=p.subject,
+                        content=p.content)
+        else:
+            error = "You need to be logged in to comment posts!"
+            return self.render('login.html', error=error)
 
     def post(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
@@ -290,6 +293,43 @@ class CreateComment(Handler):
                          content=p.content, error=error)
 
 
+class EditComment(Handler):
+    """class that let's a user edit his or her own comment"""
+    def get(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+        cid = p.key().id()
+        comment = Comment.gql('WHERE commentid = :cid', cid=cid)
+
+        for c in comment:
+            if self.user:
+                self.render("editcomment.html", p=p, subject=p.subject,
+                            content=p.content, commented=c.comment)
+            else:
+                error = "You need to be logged in to comment posts!"
+                return self.render('login.html', error=error)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        commentin = self.request.get("comment")
+        comment = commentin.replace('\n', '<br>')
+        commentauthor = self.user.name
+        commentid = int(p.key().id())
+
+        if comment and commentid:
+            c.comment = comment
+            c.put()
+            time.sleep(0.1)
+            self.redirect("/blog")
+        else:
+            error = "You have to enter text in the comment field!"
+            self.render("newcomment.html", p=p, subject=p.subject,
+                         content=p.content, error=error)
+
+
+
 class MyPosts(Handler):
     """class that handles users own posts, to show them all on one page"""
     def render_posts(self):
@@ -307,16 +347,16 @@ class MyPosts(Handler):
 # functions that check username, password and email for correct syntax in
 # the signup form
 
-username_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
+    username_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     return username and username_RE.match(username)
 
-password_RE = re.compile(r"^.{3,20}$")
 def valid_password(password):
+    password_RE = re.compile(r"^.{3,20}$")
     return password and password_RE.match(password)
 
-email_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
+    email_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
     return not email or email_RE.match(email)
 
 
@@ -431,6 +471,7 @@ app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog/logout', Logout),
                                ('/blog/deleted/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),
+                               ('/blog/editcomment/([0-9]+)',EditComment),
                                ('/blog/newlike/([0-9]+)', LikeHandler),
                                ('/blog/myposts', MyPosts)
                              ],
