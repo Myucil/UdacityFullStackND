@@ -144,19 +144,6 @@ class Posts(db.Model):
         return render_str("post.html", p = self)
 
 
-class PostHandler(Handler):
-    """class that shows a newly created blog post"""
-    def get(self, post_id):
-        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
-        p = db.get(key)
-
-        if not p:
-            self.error(404)
-            return
-
-        self.render("permalink.html", p = p)
-
-
 class NewPost(Handler):
     """class that renders a form page for creating a new blog post"""
     def get(self):
@@ -186,20 +173,17 @@ class NewPost(Handler):
                          error=error)
 
 
-class LikeHandler(Handler):
-    """class that handles likes for a blogpost, updating the posts number of
-     likes and the people who have liked it"""
-    def post(self, post_id):
+class PostHandler(Handler):
+    """class that shows a newly created blog post"""
+    def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
 
-        p.likes = p.likes + 1
-        p.likers.append(self.user.name)
+        if not p:
+            self.error(404)
+            return
 
-        if self.user.name != p.author:
-            p.put()
-            time.sleep(0.1)
-            self.redirect("/blog")
+        self.render("permalink.html", p = p)
 
 
 class EditPost(Handler):
@@ -235,6 +219,21 @@ class EditPost(Handler):
             error = "You need to be logged in to edit your post!"
             return self.render('login.html', error=error)
 
+
+class LikeHandler(Handler):
+    """class that handles likes for a blogpost, updating the posts number of
+     likes and the people who have liked it"""
+    def post(self, post_id):
+        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
+        p = db.get(key)
+
+        p.likes = p.likes + 1
+        p.likers.append(self.user.name)
+
+        if self.user.name != p.author:
+            p.put()
+            time.sleep(0.1)
+            self.redirect("/blog")
 
 
 class DeletePost(Handler):
@@ -295,39 +294,31 @@ class CreateComment(Handler):
 
 class EditComment(Handler):
     """class that let's a user edit his or her own comment"""
-    def get(self, post_id):
-        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
-        p = db.get(key)
-        cid = p.key().id()
-        comment = Comment.gql('WHERE commentid = :cid', cid=cid)
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent = blog_key())
+        c = db.get(key)
 
-        for c in comment:
-            if self.user:
-                self.render("editcomment.html", p=p, subject=p.subject,
-                            content=p.content, commented=c.comment)
-            else:
-                error = "You need to be logged in to comment posts!"
-                return self.render('login.html', error=error)
+        if self.user:
+            self.render("editcomment.html", c=c, commented=c.comment)
+        else:
+            error = "You need to be logged in to comment posts!"
+            return self.render('login.html', error=error)
 
-    def post(self, post_id):
-        key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
-        p = db.get(key)
+    def post(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent = blog_key())
+        c = db.get(key)
 
         commentin = self.request.get("comment")
         comment = commentin.replace('\n', '<br>')
-        commentauthor = self.user.name
-        commentid = int(p.key().id())
 
         if comment and commentid:
-            c.comment = comment
+            c = Comment(parent = blog_key(), comment=comment)
             c.put()
             time.sleep(0.1)
             self.redirect("/blog")
         else:
             error = "You have to enter text in the comment field!"
-            self.render("newcomment.html", p=p, subject=p.subject,
-                         content=p.content, error=error)
-
+            self.render("editcomment.html", c=c, commented=c.comment)
 
 
 class MyPosts(Handler):
