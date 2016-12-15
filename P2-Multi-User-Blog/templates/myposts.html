@@ -41,6 +41,12 @@
                                 written by {{ c.commentauthor }} on {{ c.created.strftime("%a %b %d, %Y") }}
                             </span>
                             <br><br>
+                            {% if c.commentauthor == user.name %}
+                                <form action="/blog/editcomment/{{c.key().id()}}" method="get">
+                                    <input type="submit" value="EDIT COMMENT">
+                                </form>
+                            {% endif %}
+                            <br>
                         </div>
                     {% endif %}
                 {% endfor %}
