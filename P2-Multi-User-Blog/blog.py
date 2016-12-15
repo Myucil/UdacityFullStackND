@@ -298,8 +298,10 @@ class EditComment(Handler):
         key = db.Key.from_path('Comment', int(comment_id), parent = blog_key())
         c = db.get(key)
 
+        commented = c.comment.replace('<br>', '')
+
         if self.user:
-            self.render("editcomment.html", c=c, commented=c.comment)
+            self.render("editcomment.html", c=c, commented=commented)
         else:
             error = "You need to be logged in to comment posts!"
             return self.render('login.html', error=error)
@@ -310,9 +312,12 @@ class EditComment(Handler):
 
         commentin = self.request.get("comment")
         comment = commentin.replace('\n', '<br>')
+        commentid = c.commentid
+        commentauthor = c.commentauthor
 
         if comment and commentid:
-            c = Comment(parent = blog_key(), comment=comment)
+            c = Comment(parent = blog_key(), comment=comment,
+                        commentid=commentid, commentauthor=commentauthor)
             c.put()
             time.sleep(0.1)
             self.redirect("/blog")
