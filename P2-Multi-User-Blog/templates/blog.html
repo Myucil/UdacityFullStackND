@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <div align="center">
+        {{ message }}
+    </div>
     {% for p in posts %}
         {{ p.render() | safe }}
         <div class="post_footer">
@@ -52,8 +55,12 @@
                                 <form action="/blog/editcomment/{{c.key().id()}}" method="get">
                                     <input type="submit" value="EDIT COMMENT">
                                 </form>
+                                <br>
+                                <form action="/blog/deletecomment/{{c.key().id()}}" method="get" class="delete_button">
+                                    <input type="submit" value="DELETE COMMENT">
+                                </form>
                             {% endif %}
-                            <br>
+                            <br><br>
                         </div>
                     {% endif %}
                 {% endfor %}
