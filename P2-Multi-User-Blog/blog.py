@@ -244,7 +244,8 @@ class DeletePost(Handler):
 
         if self.user.name == p.author:
             p.delete()
-            self.render("blog.html", p=p)
+            message = "Your Post has been irrevocably DELETED!"
+            self.render("blog.html", p=p, message=message)
         else:
             error = "You can only delete your own posts!"
             return self.render("login.html", error=error)
@@ -316,14 +317,29 @@ class EditComment(Handler):
         commentauthor = c.commentauthor
 
         if comment and commentid:
-            c = Comment(parent = blog_key(), comment=comment,
-                        commentid=commentid, commentauthor=commentauthor)
+            c.comment = comment
+            c.commentauthor = commentauthor
             c.put()
             time.sleep(0.1)
             self.redirect("/blog")
         else:
             error = "You have to enter text in the comment field!"
             self.render("editcomment.html", c=c, commented=c.comment)
+
+
+class DeleteComment(Handler):
+    """class for deleting a comment"""
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent = blog_key())
+        c = db.get(key)
+
+        if self.user.name == c.commentauthor:
+            c.delete()
+            message = "Your Comment has been irrevocably DELETED!"
+            self.render("blog.html", c=c, message = message)
+        else:
+            error = "You can only delete your own posts!"
+            return self.render("login.html", error=error)
 
 
 class MyPosts(Handler):
@@ -468,6 +484,7 @@ app = webapp2.WSGIApplication([('/', Entrance),
                                ('/blog/deleted/([0-9]+)', DeletePost),
                                ('/blog/newcomment/([0-9]+)', CreateComment),
                                ('/blog/editcomment/([0-9]+)',EditComment),
+                               ('/blog/deletecomment/([0-9]+)', DeleteComment),
                                ('/blog/newlike/([0-9]+)', LikeHandler),
                                ('/blog/myposts', MyPosts)
                              ],
