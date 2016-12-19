@@ -16,8 +16,8 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
     autoescape = True)
 
 
-# Global function for rendering a string which does not inherit from the class
-# Handler
+# The function below is a global function for rendering a string which does
+# not inherit from the class Handler
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
@@ -78,7 +78,7 @@ class Entrance(Handler):
         self.render("entrance.html")
 
 
-# Functions for hashing and salting
+# The functions below are for hashing and salting
 
 def make_salt():
     return ''.join(random.choice(letters) for x in range(5))
@@ -169,7 +169,7 @@ class NewPost(Handler):
             self.redirect("/blog/%s" % str(p.key().id()))
         else:
             error = "You have to fill in both subject and content fields!"
-            self.render("newpost.html", subject=subject, content=content,
+            return self.render("newpost.html", subject=subject, content=content,
                          error=error)
 
 
@@ -181,7 +181,7 @@ class PostHandler(Handler):
 
         if not p:
             self.error(404)
-            return
+            return self.render("404.html")
 
         self.render("permalink.html", p = p)
 
@@ -191,6 +191,10 @@ class EditPost(Handler):
     def get(self, post_id):
         key = db.Key.from_path('Posts', int(post_id), parent = blog_key())
         p = db.get(key)
+
+        if not p:
+            self.error(404)
+            return self.render("404.html")
 
         if self.user.name == p.author:
             self.render("edit.html", p=p, subject=p.subject, content=p.content)
@@ -205,7 +209,7 @@ class EditPost(Handler):
         subject = self.request.get("subject")
         content = self.request.get("content")
 
-        if self.user.name == p.author:
+        if self.user and self.user.name == p.author:
             if subject and content:
                 p.subject = subject
                 p.content = content
@@ -281,16 +285,17 @@ class CreateComment(Handler):
         commentauthor = self.user.name
         commentid = int(p.key().id())
 
-        if comment and commentid:
-            c = Comment(parent = blog_key(), comment=comment,
-                        commentauthor=commentauthor, commentid = commentid)
-            c.put()
-            time.sleep(0.1)
-            self.redirect("/blog")
-        else:
-            error = "You have to enter text in the comment field!"
-            self.render("newcomment.html", p=p, subject=p.subject,
-                         content=p.content, error=error)
+        if self.user:
+            if commentauthor and comment and commentid:
+                c = Comment(parent = blog_key(), comment=comment,
+                            commentauthor=commentauthor, commentid = commentid)
+                c.put()
+                time.sleep(0.1)
+                self.redirect("/blog")
+            else:
+                error = "You have to enter text in the comment field!"
+                return self.render("newcomment.html", p=p, subject=p.subject,
+                             content=p.content, error=error)
 
 
 class EditComment(Handler):
@@ -298,6 +303,10 @@ class EditComment(Handler):
     def get(self, comment_id):
         key = db.Key.from_path('Comment', int(comment_id), parent = blog_key())
         c = db.get(key)
+
+        if not c:
+            self.error(404)
+            return self.render("404.html")
 
         commented = c.comment.replace('<br>', '')
 
@@ -316,15 +325,16 @@ class EditComment(Handler):
         commentid = c.commentid
         commentauthor = c.commentauthor
 
-        if comment and commentid:
-            c.comment = comment
-            c.commentauthor = commentauthor
-            c.put()
-            time.sleep(0.1)
-            self.redirect("/blog")
-        else:
-            error = "You have to enter text in the comment field!"
-            self.render("editcomment.html", c=c, commented=c.comment)
+        if self.user:
+            if commentauthor and comment and commentid:
+                c.comment = comment
+                c.commentauthor = commentauthor
+                c.put()
+                time.sleep(0.1)
+                self.redirect("/blog")
+            else:
+                error = "You have to enter text in the comment field!"
+                return self.render("editcomment.html", c=c, commented=c.comment)
 
 
 class DeleteComment(Handler):
@@ -355,8 +365,7 @@ class MyPosts(Handler):
         self.render_posts()
 
 
-
-# functions that check username, password and email for correct syntax in
+# The functions below check username, password and email for correct syntax in
 # the signup form
 
 def valid_username(username):
